@@ -1,0 +1,36 @@
+return res={
+    status:200,
+    message:"abcd",
+    data:any,
+    error:"any releated error",
+}
+
+token always generate after login not for signup correct
+200 
+201
+400
+404
+500
+
+
+in this no token will generate 
+register 
+first name
+last name
+mobile no
+email
+password
+conform password
+(after signup user will redirect to login page)
+
+
+login
+email
+password
+if(both validate){
+    generate token
+    nothing store in database
+}
+
+
+services.msc
