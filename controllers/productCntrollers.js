@@ -1,4 +1,5 @@
 import Product from "../models/addProduct.js";
+import Category from "../models/productCategory.js";
 import Role from "../models/roles.js";
 import user from "../models/user.js";
 import userProduct from "../models/userProduct.js";
@@ -16,31 +17,44 @@ export const sendResponse = (res, statusCode, message, data = null, error = null
 
 export const createProduct = async (req, res) => {
     try {
-        const { name, price, image, category, description } = req.body;
+        const { name, price, image, category, description, ishot, discountedItem, color, size } = req.body;
+        console.log(req.body);
         // const userRole = await Role.findOne({ name: "user" });
-        const userId= req.user.id;
-        console.log(userId);
+        const id = req.user.userId;
+
 
         // if (req.user.role == userRole._id) 
         //     return sendResponse(res, 400, "Not Authorised to create product", null, null)
         // }
+        const productCategory = await Category.create({
+            size,
+            discountedItem,
+            color,
+            hotItem: ishot,
+        })
+        console.log("productCategory;;;;;;", productCategory._id);
+        console.log(productCategory)
         const newProduct = await Product.create({
             name,
             price,
             image,
             category,
             description,
+            categoryId: productCategory._id
         })
+        console.log(newProduct)
         console.log('product._id', newProduct._id);
         await userProduct.create(
             {
-                user: req.user.id,
+                user: req.user.userId,
                 product: newProduct._id,
             },
+            console.log(userProduct)
         )
         return sendResponse(res, 201, "Product created successfully", newProduct)
 
     } catch (error) {
+        console.error();
         return sendResponse(res, 500, "Server error", null, error.message)
     }
 };
@@ -49,8 +63,23 @@ export const createProduct = async (req, res) => {
 export const getProducts = async (req, res) => {
     try {
         const products = await userProduct
-            .find({ user: req.user.id })
-            .populate("product");
+            .find({ user: req.user.userId })
+            .populate({
+                path: "product",
+                populate: {
+                    path: "categoryId",   // 👈 product ke andar jo ref hai usko populate karega
+                    // model: "Category"     // 👈 optional but ensures correct model
+                }
+            });
+
+
+        // const category = await Product.find().populate('categoryId')
+        // console.log("category",category)
+        // .find({new:Category})
+        // .populate("Category")
+        // .populate('categoryId')
+        // .populate("product.categoryId")
+        console.log(products);
 
         if (!products || products.length === 0) {
             return sendResponse(res, 404, "No products found", [])
@@ -63,7 +92,7 @@ export const getProducts = async (req, res) => {
     }
 };
 
-
+//so this is my new line to push 
 export const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -100,10 +129,11 @@ export const deleteProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price, image, category } = req.body;
+        console.log('req.params', req.params);
+        const { name, description, price, image, category, ishot, discounted, color, size } = req.body;
 
-        const product = await Product.findById(id);
-
+        const product = await Product.findById(id).populate('categoryId')
+        console.log(product)
         if (!product) return sendResponse(res, 404, "Product not found")
 
         // Update only the provided fields
@@ -112,8 +142,14 @@ export const updateProduct = async (req, res) => {
         if (image) product.image = image;
         if (category) product.category = category;
         if (description) product.description = description;
+        if (ishot) product.categoryId.hotItem = ishot;
+        if (discounted) product.categoryId.discounted = discounted;
+        if (color) product.categoryId.color = color;
+        if (size) product.categoryId.size = size;
 
         const updatedProduct = await product.save();
+        console.log(product.categoryId.color)
+        console.log(updateProduct);
 
 
         return sendResponse(res, 200, "Product updated successfully", updatedProduct, null)

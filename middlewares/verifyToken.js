@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken";
 
 export const verifyToken = (req, res, next) => {
-    console.log("Enter to verify token");
+    // console.log("Enter to verify token");
     const authHeaders = req.headers["authorization"];
-    console.log("Authorization Header:", authHeaders);
+    // console.log("Authorization Header:", authHeaders);
 
     const token = authHeaders && authHeaders.split(" ")[1];
-    console.log("Extracted Token:", token);
+    // console.log("Extracted Token:", token);
 
     if (!token) {
         return res.status(403).json({ message: "Access denied" });
@@ -21,5 +21,5 @@ export const verifyToken = (req, res, next) => {
         req.user = decoded;
         next();
     });
-    console.log("Exit to verify token");
+    // console.log("Exit to verify token");
 };
