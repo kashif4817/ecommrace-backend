@@ -17,7 +17,7 @@ export const sendResponse = (res, statusCode, message, data = null, error = null
 
 export const createProduct = async (req, res) => {
     try {
-        const { name, price, image, category, description, ishot, discountedItem, color, size } = req.body;
+        const { name, price, images, category, description, ishot, discountedItem, color, size } = req.body;
         console.log(req.body);
         // const userRole = await Role.findOne({ name: "user" });
         const id = req.user.userId;
@@ -37,7 +37,7 @@ export const createProduct = async (req, res) => {
         const newProduct = await Product.create({
             name,
             price,
-            image,
+            images,
             category,
             description,
             categoryId: productCategory._id
